@@ -1,0 +1,27 @@
+{
+  "name": "basix",
+  "version": "1.0.0",
+  "description": "htmx-pug-express-sqlite-docker boilerplate",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "start:lan": "HOST=0.0.0.0 node src/server.js",
+    "dev": "nodemon src/server.js",
+    "dev:lan": "HOST=0.0.0.0 nodemon src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cinar Doruk",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^12.4.6",
+    "express": "^5.1.0",
+    "pug": "^3.0.3"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3",
+    "nodemon": "^3.1.11",
+    "connect-livereload": "^0.6.1",
+    "livereload": "^0.10.3"
+  }
+}

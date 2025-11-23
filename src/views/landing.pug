@@ -1,0 +1,18 @@
+extends base.pug
+
+block content
+  .container
+    .row.min-vh-100.align-items-center.justify-content-center
+      .col-md-8.col-lg-6.text-center
+        .hero-section
+          h1.display-1.fw-bold.mb-4 Basix
+          p.lead.text-muted.mb-4 A boilerplate for building simple SSR web applications
+          .tech-stack.mb-5
+            span.badge.bg-primary.me-2.mb-2 Express
+            span.badge.bg-success.me-2.mb-2 Pug
+            span.badge.bg-info.me-2.mb-2 HTMX
+            span.badge.bg-warning.text-dark.me-2.mb-2 Bootstrap
+            span.badge.bg-secondary.me-2.mb-2 SQLite
+          .d-grid.gap-2.d-sm-flex.justify-content-sm-center
+            a.btn.btn-primary.btn-lg.px-4.gap-3(href="/health") Check Health
+            a.btn.btn-outline-secondary.btn-lg.px-4(href="https://github.com" target="_blank") View on GitHub
