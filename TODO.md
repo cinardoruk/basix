@@ -33,13 +33,16 @@ extras
 * [X] make license MIT  #a846bf0b
 * [X] livereload doesn't work. browser console error.  #e16714c4
 * [X] /health doesn't work. turn routes into simpler changebase style  #d8325aed
-* [ ] livereload  #0752c45b
+* [X] livereload  #0752c45b
 * [ ] put up on github  #ecde1dc4
-* [ ] readme.md  #4b6a15da
 * [o] copy things over from momo  #66d952a0
     * [X] npm run scripts  #0171a0f5
         * [X] local  #1a4578aa
         * [X] LAN  #c8895613
     * [ ] simple sqlite bit  #002dac5c
-* [ ] auth  #c12692c5
+* [ ] readme.md  #4b6a15da
+* [ ] deploy.sh  #5e54c277
+    * [ ] db make_copy_and_download  #f5ccd129
+    * [ ] docker start/stop  #86bfc251
 * [ ] docker  #bb1b7a22
+* [ ] auth  #c12692c5
