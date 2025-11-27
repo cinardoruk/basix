@@ -34,6 +34,13 @@ body {
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
   font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tech-stack a:hover .badge {
+  transform: translateY(-2px);
+  opacity: 0.85;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Custom scrollbar */

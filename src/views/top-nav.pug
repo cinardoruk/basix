@@ -1,0 +1,17 @@
+nav.navbar.navbar-light.bg-light
+  .container
+    a.navbar-brand(href="/") Basix
+    ul.navbar-nav.ms-auto.flex-row
+      if user
+        li.nav-item
+          a.nav-link(href="/dashboard") Dashboard
+        li.nav-item
+          span.nav-link.text-muted Welcome, #{user.username}!
+        li.nav-item
+          form.d-inline(method="POST" action="/logout")
+            button.btn.btn-link.nav-link(type="submit" style="border:none;cursor:pointer") Logout
+      else
+        li.nav-item
+          a.nav-link(href="/login") Login
+        li.nav-item
+          a.btn.btn-primary.ms-2(href="/register") Register

@@ -22,6 +22,7 @@ import path from "path";
 import os from "os";
 import { fileURLToPath } from "url";
 import { createSessionMiddleware } from "./middleware/session.js";
+import { addSessionToLocals } from "./middleware/locals.js";
 import { requestLogger } from "./middleware/requestLogger.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import routes from "./routes/index.js";
@@ -63,6 +64,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session middleware (must be after body parsers)
 app.use(createSessionMiddleware());
+
+// Add session data to response locals (must be after session middleware)
+app.use(addSessionToLocals);
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "..", "public")));
