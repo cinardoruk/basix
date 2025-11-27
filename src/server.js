@@ -8,11 +8,12 @@
  * 4. Configure Pug as view engine
  * 5. Add LiveReload middleware (development only)
  * 6. Add request logging and body parsing middleware
- * 7. Serve static files from public directory
- * 8. Mount application routes
- * 9. Add 404 and error handling middleware
- * 10. Start HTTP server on configured host and port
- * 11. Set up graceful shutdown handlers for SIGTERM/SIGINT
+ * 7. Add session middleware for authentication
+ * 8. Serve static files from public directory
+ * 9. Mount application routes
+ * 10. Add 404 and error handling middleware
+ * 11. Start HTTP server on configured host and port
+ * 12. Set up graceful shutdown handlers for SIGTERM/SIGINT
  */
 
 import dotenv from "dotenv";
@@ -20,6 +21,7 @@ import express from "express";
 import path from "path";
 import os from "os";
 import { fileURLToPath } from "url";
+import { createSessionMiddleware } from "./middleware/session.js";
 import { requestLogger } from "./middleware/requestLogger.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import routes from "./routes/index.js";
@@ -58,6 +60,9 @@ if (process.env.NODE_ENV === "development") {
 app.use(requestLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Session middleware (must be after body parsers)
+app.use(createSessionMiddleware());
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "..", "public")));

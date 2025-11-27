@@ -34,15 +34,17 @@ The server follows this exact initialization order:
 3. Create Express app
 4. Configure Pug view engine
 5. **Add LiveReload middleware** (dev only, MUST be early in stack)
-6. Add request logging and body parsers
-7. Serve static files from `/public`
-8. Mount application routes
-9. Add 404 handler (must be after all routes)
-10. Add error handler (must be last)
-11. Start HTTP server
-12. Set up graceful shutdown handlers
+6. Add request logging
+7. **Add session middleware** (MUST come before routes that use sessions)
+8. Add body parsers
+9. Serve static files from `/public`
+10. Mount application routes (auth middleware applied per-route)
+11. Add 404 handler (must be after all routes)
+12. Add error handler (must be last)
+13. Start HTTP server
+14. Set up graceful shutdown handlers
 
-**Critical:** Middleware order matters. LiveReload must come before routes, 404 handler after routes, error handler last.
+**Critical:** Middleware order matters. LiveReload first (dev only), then logging, then session, then body parsers, then static files, then routes, then 404 handler, then error handler last.
 
 ### ES Modules Configuration
 
@@ -72,6 +74,12 @@ router.use("/api", apiRouter);
 
 **Current routes:**
 - `GET /` → Landing page (Pug template)
+- `GET /login` → Login page
+- `POST /login` → Handle login
+- `GET /register` → Registration page
+- `POST /register` → Handle registration
+- `POST /logout` → Handle logout
+- `GET /dashboard` → Protected dashboard (requires auth)
 - `GET /health` → Health check with database connectivity test
 - `GET /api/examples` → Example data endpoint
 - `POST /api/examples` → Create example
@@ -149,6 +157,7 @@ Set in `.env` file (see `.env.example` for template):
 | `DATABASE_PATH` | `./data/basix.db` | SQLite file location |
 | `LOG_LEVEL` | `info` | `debug` logs all requests, `info` logs errors only |
 | `LIVERELOAD_PORT` | `35245` | LiveReload server port |
+| `SESSION_SECRET` | `change-this-in-production` | Secret key for session encryption (MUST change in production) |
 
 ## LiveReload Configuration
 
@@ -161,21 +170,98 @@ This ensures LiveReload works when accessing the app from other devices on LAN. 
 
 **Watches:** `.pug`, `.js`, `.css`, `.html` files in `src/` directory with 50ms delay.
 
+## Authentication System
+
+The project includes a complete authentication system with session management:
+
+### Session Management
+
+Sessions are stored in SQLite using `better-sqlite3-session-store`:
+- **Store:** Sessions table in database
+- **Secret:** Set via `SESSION_SECRET` env var (defaults to dev value)
+- **Cookie settings:** 7-day expiration, httpOnly, secure in production
+- **Cleanup:** Expired sessions cleared every 15 minutes
+
+Session middleware is configured in `src/middleware/session.js` and must be added before routes.
+
+### Authentication Middleware
+
+Two middleware functions in `src/middleware/auth.js`:
+
+1. **`requireAuth`** - Protects routes, requires logged-in user
+   - Redirects to `/login` for browser requests
+   - Returns 401 for HTMX requests
+
+2. **`redirectIfAuthenticated`** - Redirects authenticated users away from login/register
+   - Used on login and register pages
+   - Redirects to `/dashboard` if already logged in
+
+### Password Security
+
+Password hashing utilities in `src/utils/auth.js`:
+- Uses bcrypt with 10 salt rounds
+- `hashPassword(password)` - Hashes password for storage
+- `comparePassword(password, hash)` - Verifies password against hash
+
+### Auth Routes
+
+Routes defined in `src/routes/auth.js`:
+- Login and register forms (Pug templates)
+- Form submission handlers
+- Session creation on successful auth
+- Logout handler (destroys session)
+
+**Usage example:**
+```javascript
+import { requireAuth } from '../middleware/auth.js';
+
+// Protect a route
+router.get('/dashboard', requireAuth, (req, res) => {
+  res.render('dashboard', {
+    username: req.session.username
+  });
+});
+```
+
+### Auth Views
+
+Three Pug templates in `src/views/`:
+- `login.pug` - Email/password login form
+- `register.pug` - Username/email/password registration form
+- `dashboard.pug` - Example protected page
+
+All extend `base.pug` and use Bootstrap form styling.
+
 ## Middleware Chain
 
 **Order is critical:**
 
 1. **LiveReload** (dev only) - Injects client script
 2. **Request Logger** - Logs HTTP requests
-3. **Body Parsers** - JSON and URL-encoded
-4. **Static Files** - Serves `/public` directory
-5. **Application Routes** - All route handlers
-6. **404 Handler** - Catches unmatched routes
-7. **Error Handler** - Global error handling (must be last)
+3. **Session Middleware** - Must come before auth routes
+4. **Body Parsers** - JSON and URL-encoded
+5. **Static Files** - Serves `/public` directory
+6. **Application Routes** - All route handlers (auth middleware applied per-route)
+7. **404 Handler** - Catches unmatched routes
+8. **Error Handler** - Global error handling (must be last)
 
 All error responses are JSON format. Development mode includes stack traces, production mode hides them.
 
 ## Common Development Tasks
+
+### Adding a Protected Route
+
+```javascript
+// In src/routes/index.js
+import { requireAuth } from '../middleware/auth.js';
+
+router.get('/protected-page', requireAuth, (req, res) => {
+  res.render('protected-page', {
+    username: req.session.username,
+    userId: req.session.userId
+  });
+});
+```
 
 ### Adding a New Feature Route
 
@@ -227,13 +313,16 @@ Accessible at root URL: `/css/style.css`, `/images/logo.png`, etc.
 
 ## Important Gotchas
 
-- **Middleware order:** LiveReload → logging → body parsing → static files → routes → 404 → error handler
+- **Middleware order:** LiveReload → logging → session → body parsing → static files → routes → 404 → error handler
+- **Session middleware:** Must be added before routes that use `req.session`
+- **SESSION_SECRET:** MUST be changed in production (set in `.env`)
 - **Static files path:** Must use absolute path `path.join(__dirname, "..", "public")`
 - **View path:** Must use absolute path `path.join(__dirname, "views")`
 - **LAN access:** Requires `HOST=0.0.0.0` for both main server and LiveReload
 - **Database schema:** Runs on every startup, use `IF NOT EXISTS`
 - **Import paths:** Always include `.js` extension in ES module imports
 - **LiveReload only in dev:** Check `NODE_ENV === "development"` before enabling
+- **Password security:** Always use bcrypt utilities, never store plain text passwords
 
 ## File Structure Reference
 
@@ -242,18 +331,25 @@ src/
 ├── server.js              # Entry point, middleware chain, server lifecycle
 ├── routes/
 │   ├── index.js          # Route aggregation and mounting
+│   ├── auth.js           # Authentication routes (login, register, logout)
 │   ├── health.js         # Health check endpoint
 │   └── api.js            # Example API endpoints
 ├── middleware/
+│   ├── auth.js           # Authentication middleware (requireAuth, redirectIfAuthenticated)
+│   ├── session.js        # Session configuration
 │   ├── requestLogger.js  # HTTP request logging
 │   └── errorHandler.js   # 404 and error handling
 ├── db/
 │   └── database.js       # SQLite wrapper and utilities
 ├── utils/
+│   ├── auth.js           # Password hashing utilities (bcrypt)
 │   └── livereload-util.js # LiveReload configuration
 └── views/
     ├── base.pug          # Base layout template
-    └── landing.pug       # Home page
+    ├── landing.pug       # Home page
+    ├── login.pug         # Login form
+    ├── register.pug      # Registration form
+    └── dashboard.pug     # Protected dashboard page
 
 data/
 ├── schema.sql            # Database schema (runs on startup)

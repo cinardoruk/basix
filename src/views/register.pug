@@ -1,0 +1,31 @@
+extends base.pug
+
+block content
+  .container
+    .row.min-vh-100.align-items-center.justify-content-center
+      .col-md-6.col-lg-4
+        .card
+          .card-body
+            h2.card-title.text-center.mb-4 Register
+
+            if error
+              .alert.alert-danger= error
+
+            form(method="POST" action="/register")
+              .mb-3
+                label.form-label(for="username") Username
+                input.form-control(type="text" id="username" name="username" required)
+
+              .mb-3
+                label.form-label(for="email") Email
+                input.form-control(type="email" id="email" name="email" required)
+
+              .mb-3
+                label.form-label(for="password") Password
+                input.form-control(type="password" id="password" name="password" required minlength="6")
+
+              button.btn.btn-primary.w-100(type="submit") Register
+
+            .text-center.mt-3
+              p.mb-0 Already have an account?
+                a(href="/login") Login

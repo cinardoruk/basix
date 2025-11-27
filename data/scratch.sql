@@ -1,3 +1,5 @@
--- db: ./basix.db
+-- db: ./data/basix.db
 SELECT *
-FROM sqlite_master;
+FROM sessions;
+
+-- DROP TABLE sessions;

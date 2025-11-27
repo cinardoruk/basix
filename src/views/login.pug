@@ -1,0 +1,27 @@
+extends base.pug
+
+block content
+  .container
+    .row.min-vh-100.align-items-center.justify-content-center
+      .col-md-6.col-lg-4
+        .card
+          .card-body
+            h2.card-title.text-center.mb-4 Login
+
+            if error
+              .alert.alert-danger= error
+
+            form(method="POST" action="/login")
+              .mb-3
+                label.form-label(for="email") Email
+                input.form-control(type="email" id="email" name="email" required)
+
+              .mb-3
+                label.form-label(for="password") Password
+                input.form-control(type="password" id="password" name="password" required)
+
+              button.btn.btn-primary.w-100(type="submit") Login
+
+            .text-center.mt-3
+              p.mb-0 Don't have an account?
+                a(href="/register") Register

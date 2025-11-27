@@ -14,14 +14,17 @@
   "author": "Cinar Doruk",
   "license": "MIT",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.4.6",
+    "better-sqlite3-session-store": "^0.1.0",
     "express": "^5.1.0",
+    "express-session": "^1.18.2",
     "pug": "^3.0.3"
   },
   "devDependencies": {
-    "dotenv": "^17.2.3",
-    "nodemon": "^3.1.11",
     "connect-livereload": "^0.6.1",
-    "livereload": "^0.10.3"
+    "dotenv": "^17.2.3",
+    "livereload": "^0.10.3",
+    "nodemon": "^3.1.11"
   }
 }

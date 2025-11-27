@@ -34,14 +34,10 @@ export function initDatabase() {
   const schemaPath = path.join(__dirname, "../../data/schema.sql");
   const schema = fs.readFileSync(schemaPath, "utf8");
 
-  // Execute schema (split by semicolon and run each statement)
-  const statements = schema
-    .split(";")
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-
-  for (const statement of statements) {
-    db.exec(statement);
+  try {
+    db.exec(schema);
+  } catch (err) {
+    console.error("awawa====>", err);
   }
 
   console.log(`Database initialized at ${dbPath}`);
@@ -88,7 +84,7 @@ export function cleanExpiredCache() {
 export function cleanExpiredSessions() {
   const db = getDatabase();
   const stmt = db.prepare(
-    'DELETE FROM sessions WHERE expires_at < datetime("now")',
+    'DELETE FROM sessions WHERE expires < datetime("now")',
   );
   const result = stmt.run();
   return result.changes;

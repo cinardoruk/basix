@@ -1,0 +1,21 @@
+extends base.pug
+
+block content
+  .container.py-5
+    .row
+      .col-12
+        .d-flex.justify-content-between.align-items-center.mb-4
+          h1 Dashboard
+          form(method="POST" action="/logout")
+            button.btn.btn-outline-danger(type="submit") Logout
+
+        .card
+          .card-body
+            h3.card-title Welcome, #{username}!
+            p.card-text You are now logged in. This is a protected route.
+
+            .alert.alert-info
+              strong Session Info:
+              ul.mb-0
+                li Username: #{username}
+                li This page is only accessible when logged in
